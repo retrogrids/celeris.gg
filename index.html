@@ -1,14 +1,55 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=0.5, user-scalable=no">
     <title>celeris</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=auto">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+      body { margin:0; overflow:hidden; background:#000000; font-family:"Zen Dots",sans-serif; touch-action:none; }
+      #hud-logo {
+        position:fixed; bottom:0; left:0;
+        z-index:100;
+        padding:38px 42px 14px 32px;
+        font-size:50px; 
+        color:#DDDDDD; text-shadow:0 0 3px #888888, 0 0 8px #DDDDDD;
+      }
+      #hud-buttons {
+        position:fixed; bottom:0; right:0;
+        z-index:100;
+        padding:38px 42px 23px 32px;
+        text-align:right;
+        font-size:30px;
+        color:#DDDDDD; text-shadow:0 0 17px #594f37, 0 0 20px #fff0d6;
+      }
+      #hud-celeris { color:#f5c32c; text-shadow:0 0 17px #594f37, 0 0 20px #fff0d6;  }
+      .hud-button { display:inline-block; width:30px; padding-left:4px; text-align:left; cursor:pointer; }
+      .hud-button > a > i { color:#DDDDDD; }
+      .hud-button:hover > a > i { color:#FFFFFF; }
+      .hud-button:hover > i { color:#FFFFFF; }
+      .hud-button-disabled { opacity:0.3; cursor:default !important; }
+      .hud-button-hint-pulse {
+        color:#d4ae46;
+        animation:hud-button-hint-pulse-animation 1.5s ease-in-out infinite alternate;
+      }
+      #hud-button-volume { padding-left:12px; }
+      @keyframes hud-button-hint-pulse-animation {
+        from { text-shadow:0 0 5px #000000; color:#f5c32c; }
+        to { text-shadow:0 0 20px #c9c8c7, 0 0 30px #FFFFFF; color:#c9c8c7; }
+      }
+      canvas { display: block; }
+      .noselect {
+        -webkit-touch-callout:none; /* iOS Safari */
+          -webkit-user-select:none; /* Safari */
+           -khtml-user-select:none; /* Konqueror HTML */
+             -moz-user-select:none; /* Old versions of Firefox */
+              -ms-user-select:none; /* Internet Explorer/Edge */
+                  user-select:none; /* Non-prefixed version, currently */
+      }
+    </style>
     <script>
-      var favIcon = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABhGlDQ1BJQ0MgcHJvZmlsZQAAKJF9kb9Lw0AcxV/TSkUrgnYQcchQneyiIo6likWwUNoKrTqYXPoLmjQkKS6OgmvBwR+LVQcXZ10dXAVB8AeIf4A4KbpIid9LCi1iPDjuw7t7j7t3gNCsMtUMxABVs4x0Ii7m8qti8BUBDEFAPyAxU09mFrPwHF/38PH1LsqzvM/9OQaUgskAn0gcY7phEW8Qz25aOud94jArSwrxOfGkQRckfuS67PIb55LDAs8MG9n0PHGYWCx1sdzFrGyoxDPEEUXVKF/Iuaxw3uKsVuusfU/+wlBBW8lwneYYElhCEimIkFFHBVVYiNKqkWIiTftxD/+o40+RSyZXBYwcC6hBheT4wf/gd7dmcXrKTQrFgZ4X2/4YB4K7QKth29/Htt06AfzPwJXW8deawNwn6Y2OFjkCBreBi+uOJu8BlzvAyJMuGZIj+WkKxSLwfkbflAeGb4G+Nbe39j5OH4AsdbV8AxwcAhMlyl73eHdvd2//nmn39wMai3KDnuw7YwAAAAZiS0dEAFAATgBEyuVR9wAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAAd0SU1FB+oEEgIkAx/+z+IAAALUSURBVFjD7ZZbbxNHFMd/M97ZjZM42LFrU3AvIr1RUkUtSH1o4akvvPIB+BZ8LB4rVUj5AkgFCSQoVGkSlDQJcRwntvc2u3P6YJM4EEh5wZXqeTq3OXP2nP/Rf9Wdq9eEMR5Pxvo8eI7xVjD+Doz5/QkGJhjAc+PvgPwHRiCAGlpG5bN87xPzFt/xCOS1QE7XPWMoVqvEnQ42ik+/M5T9YhEzM02038Hl+am5T4BQa40pTlEwBhHBhhFKa7ypAKU0ubXM1mvcurnJ3V8b9Fv7FIwBARvHKK3wggCAPLU0vypz5bJj+bcS4gSUQlxO0g+PCvJkuIcFY/ji+4ssfp0Q+A4R4fGf52k2IipzCUopkjTgRatMaGMufFbhy+uOKX+QaGu3gtaKRjUE4LBfohuX6EQeN37pUC4lgEIk595ywN767skOlD5u8PPVXR6uXGJjI0ErxbWlnFo5phVfQkRz8dwDEuocJh/x4+IaB7bJgS0zbbpUqzEzwQGPVpuICD8srDOXa9r9Cs3KHpvhEjhHt5cR9VaPJqGdDMZSb2i01nR6AXnmyNKM+dk2/axBnmtym3P/+XfMBXtEqcEUQsKsgnOw3y3y9EWNwDtk9VmbP+6vsPz7p8z6O6z+PcNf7UVcLigN3zQeoY3BCTgZdkAENtZDthbm+OnKGgDbLZ9na2UWPtmm5m8BQpsymY148iQiuHye+dJzKIDzcnayOpsv5+m19oi7PWr9HV7uV/i8tkl9pjfAnwiPVy4QdraPOqBuf7s0kJUaoHYqABQ2jnFZhj9dROkCiGCTGKU0NknwfP8o1uUZWWpRSpFGEYhQMAYv8EEpPOMPC3CkYUiW2sFXD8jo1eoIcRgSh+GJNUnT9NSVzrLsjdjR46zFWjsho39DRvI/74C8i3w+gD74JROGVhkhjBF6O9OvTrLQmfpxvpERvIMCz9Tf9+6xbbKGkzUcOwb+AZuChSmqTC4iAAAAAElFTkSuQmCC";
+      var favIcon = "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";
       var docHead = document.getElementsByTagName('head')[0];
       var newLink = document.createElement('link');
       newLink.rel = 'shortcut icon';
@@ -16,39 +57,23 @@
       newLink.href = 'data:image/png;base64,'+favIcon;
       docHead.appendChild(newLink);
     </script>
-    <style>
-html, body { height:100%; }
-body {
-  display:-ms-flexbox;
-  display:-webkit-box;
-  display:flex;
-  -ms-flex-align:center;
-  -ms-flex-pack:center;
-  -webkit-box-align:center;
-  align-items:center;
-  -webkit-box-pack:center;
-  justify-content:center;
-  padding-top:40px;
-  padding-bottom:40px;
-  background: linear-gradient(to bottom, #983f3b, #2a1825);
-  font-family:Zen Dots,sans-serif;
-  text-shadow:0 0 17px #594f37, 0 0 20px #fff0d6;
-}
-h1 { font-size:80px; color:#cf9b2d /* #efdea1 */; font-weight:bold; font-style:italic; }
-.noselect {
-  -webkit-touch-callout:none; /* iOS Safari */
-    -webkit-user-select:none; /* Safari */
-     -khtml-user-select:none; /* Konqueror HTML */
-       -moz-user-select:none; /* Old versions of Firefox */
-        -ms-user-select:none; /* Internet Explorer/Edge */
-            user-select:none; /* Non-prefixed version, currently
-                                 supported by Chrome, Edge, Opera and Firefox */
-}
-    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module" crossorigin src="./app.js"></script>
   </head>
-  <body class="text-center">
-    <h1 class="noselect">
-      celeris
-    </h2>
+  <body>
+    <div id="hud-logo" class="noselect"><span id="hud-celeris" class="noselect"><b><i>celeris</i></b></span></div>
+    <div id="hud-buttons" class="noselect">
+      <span id="hud-button-restart" class="hud-button hud-button-disabled" onclick="app_.restart();"><i class="fa-solid fa-rotate-right"></i></span>
+      <span id="hud-button-play-pause" class="hud-button hud-button-hint-pulse" onclick="app_.start();"><i id="hud-button-play-pause-icon" class="fa-solid fa-play"></i></span>
+      <span id="hud-button-volume" class="hud-button hud-button-disabled" onclick="app_.sound.toggleVolume();"><i id="hud-button-volume-icon" class="fa-solid fa-volume-high"></i></span>
+    </div>
+
   </body>
 </html>
